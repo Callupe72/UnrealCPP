@@ -13,3 +13,22 @@ ACPPTestGameMode::ACPPTestGameMode()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 }
+
+void ACPPTestGameMode::RespawnNewPlayer()
+{
+	FTimerHandle    handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, [this]()
+		{
+		GLog->Log("SpawnNew");
+		FVector Location = playerSpawnPosition.GetLocation();
+		FRotator Rotation = playerSpawnPosition.GetRotation().Rotator();
+		ACPPTestCharacter* newPlayer = GetWorld()->SpawnActor<ACPPTestCharacter>(Location,Rotation);
+		GetWorld()->GetFirstPlayerController()->Possess(newPlayer);
+		}, timeBeforeSpawnNewPlayer, 0);
+}
+
+void ACPPTestGameMode::SetSpawnPosition(FTransform playerStartingTransform)
+{
+	playerSpawnPosition = playerStartingTransform;
+}
+

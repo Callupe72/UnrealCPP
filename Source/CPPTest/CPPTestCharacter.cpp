@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "CPPTestGameMode.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ACPPTestCharacter
@@ -137,4 +138,57 @@ void ACPPTestCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ACPPTestCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ACPPTestGameMode* GameMode = (ACPPTestGameMode*)GetWorld()->GetAuthGameMode();
+	if (GameMode == nullptr)
+	{
+		GLog->Log("I can't find GameMode");
+		return;
+	}
+	GameMode->SetSpawnPosition(GetTransform());
+}
+
+
+void ACPPTestCharacter::AddLife(int lifeToAdd)
+{
+	if (health == 0)
+		return;
+
+	ACPPTestCharacter::health += lifeToAdd;
+
+	if (health > 100)
+	{
+		health = 100;
+	}
+	else if (health <= 0)
+	{
+		health = 0;
+		Die();
+	}
+
+	if (GEngine)
+	{
+		if(lifeToAdd >= 0)
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, (FString(FString::FromInt(health))));
+		else
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, (FString(FString::FromInt(health))));
+	}
+}
+void ACPPTestCharacter::Die()
+{
+	GetMesh()->SetSimulatePhysics(true);
+	GetCharacterMovement()->DisableMovement();
+	GetMesh()->SetCollisionProfileName("Ragdoll");
+	ACPPTestGameMode* GameMode = (ACPPTestGameMode*)GetWorld()->GetAuthGameMode();
+	if (GameMode == nullptr)
+	{
+		GLog->Log("I can't find GameMode");
+		return;
+	}
+	GameMode->RespawnNewPlayer();
 }

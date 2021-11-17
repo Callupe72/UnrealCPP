@@ -13,6 +13,17 @@ class ACPPTestGameMode : public AGameModeBase
 
 public:
 	ACPPTestGameMode();
+
+	UPROPERTY(EditAnywhere, Category = Default)
+		int timeBeforeSpawnNewPlayer = 5;
+
+	UPROPERTY()
+		FTransform playerSpawnPosition;
+
+	UFUNCTION()
+		void RespawnNewPlayer();
+	UFUNCTION()
+		void SetSpawnPosition(FTransform playerStartingTransform);
 };
 
 

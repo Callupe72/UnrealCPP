@@ -29,11 +29,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
-	UPROPERTY(VisibleAnywhere, Category = Default)
-		int health;
-
 protected:
 
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
 
@@ -71,5 +70,15 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	UPROPERTY(EditAnywhere, Category = Default)
+		int health = 100;
+
+	UFUNCTION()
+		void AddLife(int lifeToAdd);
+
+	UFUNCTION()
+		void Die();
+
 };
 
