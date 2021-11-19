@@ -31,6 +31,8 @@ public:
 
 protected:
 
+	AActor* Raycast(int RaycastDistance);
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	/** Resets HMD orientation in VR. */
@@ -79,6 +81,24 @@ public:
 
 	UFUNCTION()
 		void Die();
+
+	UFUNCTION()
+		void Pickup();
+
+	UPROPERTY()
+	AActor* actorInHand;
+
+	UPROPERTY(EditAnywhere)
+	FVector offsetPickup;
+	
+	UPROPERTY()
+	int raycastCheckDistance;
+	
+	UPROPERTY()
+	UArrowComponent* arrowProj;
+
+	UFUNCTION()
+	void ShootProjectile();
 
 };
 

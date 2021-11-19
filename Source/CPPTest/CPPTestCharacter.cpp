@@ -8,7 +8,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "DrawDebugHelpers.h"
 #include "CPPTestGameMode.h"
+#include "PhysXInterfaceWrapperCore.h"
+#include "Projectile.h"
+#include "Components/ArrowComponent.h"
+#include "Components/BoxComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ACPPTestCharacter
@@ -44,6 +49,7 @@ ACPPTestCharacter::ACPPTestCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
@@ -75,6 +81,10 @@ void ACPPTestCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ACPPTestCharacter::OnResetVR);
+
+	
+	PlayerInputComponent->BindAction("Pickup", IE_Pressed, this, &ACPPTestCharacter::Pickup);
+	PlayerInputComponent->BindAction("Shoot", IE_Pressed, this, &ACPPTestCharacter::ShootProjectile);
 }
 
 
@@ -140,6 +150,34 @@ void ACPPTestCharacter::MoveRight(float Value)
 	}
 }
 
+AActor* ACPPTestCharacter::Raycast(int RaycastDistance)
+{
+	FHitResult OutHit;
+
+	FVector Start = FollowCamera->GetComponentLocation();
+	FVector Forward = FollowCamera->GetForwardVector();
+
+	Start = Start + (Forward * CameraBoom->TargetArmLength);
+
+	FVector End = Start + (Forward * 500.f);
+	FCollisionQueryParams CollisionQueryParams;
+	CollisionQueryParams.AddIgnoredActor(this -> GetOwner());
+	DrawDebugLine(GetWorld(), Start, End, FColor::Green,false, 1,0,1);
+
+	bool IsHit = GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionQueryParams);
+
+	if(IsHit)
+	{
+		if(OutHit.GetActor())
+		{
+			if(GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, (FString(OutHit.GetActor()->GetName())));
+			return OutHit.GetActor();
+		}
+	}
+	return nullptr;
+}
+
 void ACPPTestCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -192,3 +230,48 @@ void ACPPTestCharacter::Die()
 	}
 	GameMode->RespawnNewPlayer();
 }
+
+void ACPPTestCharacter::Pickup()
+{
+	if(actorInHand == nullptr)
+	{
+		actorInHand = Raycast(raycastCheckDistance);
+		if(actorInHand == nullptr)
+		{
+			return;
+		}
+		else
+		{
+			actorInHand->SetActorLocation(FollowCamera->GetComponentLocation() + (offsetPickup *FollowCamera->GetForwardVector()));
+			
+			actorInHand->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			//SUR LE MESH
+			UPrimitiveComponent* charaInHand = Cast<UPrimitiveComponent>(actorInHand);
+			if(charaInHand==nullptr)
+			{
+				return;
+			}
+			charaInHand->SetSimulatePhysics(false);
+		}
+	}
+	else
+	{
+		UPrimitiveComponent* charaInHand = Cast<UPrimitiveComponent>(actorInHand);
+		if(charaInHand==nullptr)
+		{
+			GLog->Log("NoCapsule");
+			return;
+		}
+		charaInHand->SetSimulatePhysics(true);
+		if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, (FString(FString::FromInt(health))));
+		actorInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		actorInHand = nullptr;
+	}
+}
+
+void ACPPTestCharacter::ShootProjectile()
+{
+	//GetWorld()->SpawnActor<AProjectile>(arrowProj->GetComponentLocation(), arrowProj->GetComponentRotation());
+}
+
