@@ -3,6 +3,8 @@
 
 #include "Projectile.h"
 
+#include "Engine/DecalActor.h"
+
 // Sets default values
 AProjectile::AProjectile()
 {
@@ -11,20 +13,40 @@ AProjectile::AProjectile()
 
 	//StaticMesh->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("StaticMesh'/Game/Geometry/Meshes/1M_Cube.1M_Cube'"));
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MonMesh"));
+
+	//MESH
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("StaticMesh'/Game/StarterContent/Props/MaterialSphere.MaterialSphere'"));
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MonMesh"));
 	if (CubeMesh.Succeeded())
 	{
-		StaticMesh->SetStaticMesh(CubeMesh.Object);
+		Mesh->SetStaticMesh(CubeMesh.Object);
 	}
-	//ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
+
+	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
+	SphereCollision->InitSphereRadius(50.f);
+
+	SphereCollision->BodyInstance.SetCollisionProfileName(TEXT("CollisionProfile"));
+	Mesh->BodyInstance.SetCollisionProfileName(TEXT("CollisionProfile"));
+	SphereCollision->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+	Mesh->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
+
+	SetRootComponent(SphereCollision);
+
+	//PROJECTILE
+	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjMove"));
+	ProjectileMovement->SetUpdatedComponent(Mesh);
+	ProjectileMovement->InitialSpeed = speed;
+	ProjectileMovement->MaxSpeed = speed;
+	ProjectileMovement->ProjectileGravityScale = 0.005f;
+	ProjectileMovement->bShouldBounce = true;
+	ProjectileMovement->bSweepCollision = false;
 }
 
 // Called when the game starts or when spawned
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	//ProjectileMovement->InitialSpeed = speed;
+	//this->SetActorScale3D(FVector(0.1f, 0.1, 0.1));
 	
 }
 
@@ -36,6 +58,11 @@ void AProjectile::Tick(float DeltaTime)
 }
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	
+	GLog->Log("Hit");
+	GetWorld()->SpawnActor<ADecalActor>(this->GetActorLocation(), this->GetActorRotation());
+	if(destroyOnHit)
+	{
+		//Destroy(this);	
+	}
 }
 

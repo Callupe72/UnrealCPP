@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Projectile.generated.h"
@@ -26,10 +27,13 @@ public:
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* StaticMesh;
+	UProjectileMovementComponent* ProjectileMovement;
 	
 	UPROPERTY(VisibleAnywhere)
-	UProjectileMovementComponent* ProjectileMovement;
+	USphereComponent* SphereCollision;
+	
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(EditAnywhere)
 	float speed = 5000.f;

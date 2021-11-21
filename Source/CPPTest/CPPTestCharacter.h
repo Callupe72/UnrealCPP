@@ -88,17 +88,20 @@ public:
 	UPROPERTY()
 	AActor* actorInHand;
 
+
 	UPROPERTY(EditAnywhere)
 	FVector offsetPickup;
 	
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	int raycastCheckDistance;
 	
-	UPROPERTY()
-	UArrowComponent* arrowProj;
+	UPROPERTY(VisibleAnywhere)
+	UArrowComponent* ArrowProj;
 
 	UFUNCTION()
 	void ShootProjectile();
 
+	UFUNCTION()
+void SpawnDecals();
 };
 

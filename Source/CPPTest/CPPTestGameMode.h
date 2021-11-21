@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "CPPTestCharacter.h"
 #include "CPPTestGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -15,7 +16,10 @@ public:
 	ACPPTestGameMode();
 
 	UPROPERTY(EditAnywhere, Category = Default)
-		int timeBeforeSpawnNewPlayer = 5;
+	int timeBeforeSpawnNewPlayer = 5;
+	
+	UPROPERTY(EditAnywhere, Category = Default)
+	ACharacter* playerToSpawn;
 
 	UPROPERTY()
 		FTransform playerSpawnPosition;

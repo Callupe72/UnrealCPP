@@ -22,6 +22,7 @@ void ACPPTestGameMode::RespawnNewPlayer()
 		GLog->Log("SpawnNew");
 		FVector Location = playerSpawnPosition.GetLocation();
 		FRotator Rotation = playerSpawnPosition.GetRotation().Rotator();
+		//APawn* newPlayer = GetWorld()->SpawnActor<APawn>(Location,Rotation);
 		ACPPTestCharacter* newPlayer = GetWorld()->SpawnActor<ACPPTestCharacter>(Location,Rotation);
 		GetWorld()->GetFirstPlayerController()->Possess(newPlayer);
 		}, timeBeforeSpawnNewPlayer, 0);

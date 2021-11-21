@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "DrawDebugHelpers.h"
 #include "CPPTestGameMode.h"
+#include "DecalsPaint.h"
 #include "PhysXInterfaceWrapperCore.h"
 #include "Projectile.h"
 #include "Components/ArrowComponent.h"
@@ -32,6 +33,11 @@ ACPPTestCharacter::ACPPTestCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
+//Arrow
+
+	ArrowProj = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
+ArrowProj->SetWorldLocation(FVector(60,0,30));
+	
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
@@ -85,6 +91,7 @@ void ACPPTestCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	
 	PlayerInputComponent->BindAction("Pickup", IE_Pressed, this, &ACPPTestCharacter::Pickup);
 	PlayerInputComponent->BindAction("Shoot", IE_Pressed, this, &ACPPTestCharacter::ShootProjectile);
+	PlayerInputComponent->BindAction("SpawnDecals", IE_Pressed, this, &ACPPTestCharacter::SpawnDecals);
 }
 
 
@@ -240,38 +247,43 @@ void ACPPTestCharacter::Pickup()
 		{
 			return;
 		}
-		else
-		{
-			actorInHand->SetActorLocation(FollowCamera->GetComponentLocation() + (offsetPickup *FollowCamera->GetForwardVector()));
-			
+			actorInHand->SetActorLocation(FollowCamera->GetComponentLocation() - (offsetPickup * FollowCamera->GetForwardVector()));
 			actorInHand->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 			//SUR LE MESH
 			UPrimitiveComponent* charaInHand = Cast<UPrimitiveComponent>(actorInHand);
 			if(charaInHand==nullptr)
 			{
+				GLog->Log("Je ments");
 				return;
 			}
 			charaInHand->SetSimulatePhysics(false);
-		}
 	}
+	
 	else
 	{
 		UPrimitiveComponent* charaInHand = Cast<UPrimitiveComponent>(actorInHand);
+		actorInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		actorInHand = nullptr;
 		if(charaInHand==nullptr)
 		{
-			GLog->Log("NoCapsule");
 			return;
 		}
 		charaInHand->SetSimulatePhysics(true);
-		if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, (FString(FString::FromInt(health))));
-		actorInHand->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		actorInHand = nullptr;
 	}
 }
 
 void ACPPTestCharacter::ShootProjectile()
 {
-	//GetWorld()->SpawnActor<AProjectile>(arrowProj->GetComponentLocation(), arrowProj->GetComponentRotation());
+	GLog->Log("Spawn Bullet");
+	GetWorld()->SpawnActor<AProjectile>(ArrowProj->GetComponentLocation(), ArrowProj->GetComponentRotation());
+	GLog->Log(ArrowProj->GetComponentLocation().ToString());
+
+	//GetWorld()->SpawnActor<AProjectile>(GetActorLocation(), GetActorRotation());
+}
+
+void ACPPTestCharacter::SpawnDecals()
+{
+	GLog->Log("Spawn Decals");
+	GetWorld()->SpawnActor<ADecalsPaint>(ArrowProj->GetComponentLocation(), ArrowProj->GetComponentRotation());
 }
 
