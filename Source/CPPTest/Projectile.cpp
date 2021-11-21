@@ -39,7 +39,6 @@ AProjectile::AProjectile()
 	ProjectileMovement->MaxSpeed = speed;
 	ProjectileMovement->ProjectileGravityScale = 0.005f;
 	ProjectileMovement->bShouldBounce = true;
-	ProjectileMovement->bSweepCollision = false;
 }
 
 // Called when the game starts or when spawned
