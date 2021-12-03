@@ -40,7 +40,7 @@ public:
 		float cooldownTime = 0.2f;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* StaticMesh;;
+		UStaticMeshComponent* StaticMesh;
 
 	UPROPERTY(VisibleAnywhere)
 		ACPPTestCharacter* player;
